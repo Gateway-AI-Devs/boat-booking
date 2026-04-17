@@ -16,7 +16,10 @@ export default function AppointmentCard({ appt }) {
   const endTime = endDt.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
 
   const title   = appt.title ?? appt.name ?? appt.eventTitle ?? 'Booking'
-  const contact = appt.contact?.name ?? appt.contact?.firstName ?? appt.contactName ?? ''
+  const cObj    = appt.contact ?? {}
+  const contact = cObj.name || (cObj.firstName ? `${cObj.firstName} ${cObj.lastName ?? ''}`.trim() : '') || appt.contactName || ''
+  const phone   = cObj.phone ?? appt.phone ?? ''
+  const email   = cObj.email ?? appt.email ?? ''
   const status  = (appt.appointmentStatus ?? appt.status ?? 'confirmed').toLowerCase()
   const s       = STATUS[status] ?? STATUS.pending
 
@@ -82,6 +85,41 @@ export default function AppointmentCard({ appt }) {
             </span>
           )}
         </div>
+
+        {/* Contact details */}
+        {(phone || email) && (
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1" style={{ borderTop: '1px dashed #f0ebe3', paddingTop: '8px' }}>
+            {phone && (
+              <a
+                href={`tel:${phone}`}
+                className="flex items-center gap-1.5 text-[12px]"
+                style={{ color: '#a07d2e', textDecoration: 'none' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#7a5f22' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = '#a07d2e' }}
+              >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.49 12 19.79 19.79 0 0 1 1.21 3.18 2 2 0 0 1 3.22 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                {phone}
+              </a>
+            )}
+            {email && (
+              <a
+                href={`mailto:${email}`}
+                className="flex items-center gap-1.5 text-[12px]"
+                style={{ color: '#a07d2e', textDecoration: 'none' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = '#7a5f22' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = '#a07d2e' }}
+              >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                {email}
+              </a>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Status */}
