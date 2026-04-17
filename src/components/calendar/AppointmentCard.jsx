@@ -25,7 +25,7 @@ export default function AppointmentCard({ appt }) {
 
   return (
     <div
-      className="group relative flex items-center gap-5 rounded-2xl border bg-white px-5 py-4 cursor-default"
+      className="group relative flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 rounded-2xl border bg-white px-4 sm:px-5 py-4 cursor-default"
       style={{
         borderColor: '#ede8e0',
         boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03)',
@@ -56,12 +56,12 @@ export default function AppointmentCard({ appt }) {
 
       {/* Date block */}
       <div
-        className="flex shrink-0 flex-col items-center rounded-xl px-3.5 py-3 min-w-[56px] text-center"
+        className="flex sm:flex-col items-center sm:items-center gap-3 sm:gap-0 rounded-xl px-3.5 py-2 sm:py-3 min-w-[56px] sm:text-center"
         style={{ background: 'linear-gradient(135deg, #faf8f4 0%, #f4f0e8 100%)', border: '1px solid #ede8e0' }}
       >
         <span className="text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: '#a07d2e' }}>{month}</span>
-        <span className="text-[26px] font-semibold leading-none my-0.5" style={{ color: '#1c1c1a', fontFamily: "'DM Sans', sans-serif" }}>{day}</span>
-        <span className="text-[10px] font-medium tracking-wide" style={{ color: '#aaa' }}>{dow}</span>
+        <span className="text-[22px] sm:text-[26px] font-semibold leading-none sm:my-0.5" style={{ color: '#1c1c1a', fontFamily: "'DM Sans', sans-serif" }}>{day}</span>
+        <span className="text-[10px] font-medium tracking-wide hidden sm:block" style={{ color: '#aaa' }}>{dow}</span>
       </div>
 
       {/* Details */}
@@ -123,7 +123,7 @@ export default function AppointmentCard({ appt }) {
       </div>
 
       {/* Status */}
-      <div className="shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1" style={{ background: s.bg }}>
+      <div className="shrink-0 self-start sm:self-auto flex items-center gap-1.5 rounded-full px-3 py-1" style={{ background: s.bg }}>
         <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: s.dot }} />
         <span className="text-[11px] font-semibold uppercase tracking-[0.06em]" style={{ color: s.color }}>
           {s.label}

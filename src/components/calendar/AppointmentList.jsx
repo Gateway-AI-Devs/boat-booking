@@ -82,10 +82,10 @@ export default function AppointmentList({ calendarId, title, showGreeting = true
 
       {/* Controls bar */}
       <div className="mb-6 flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           {/* Segmented filter control */}
           <div
-            className="inline-flex rounded-xl p-1 gap-0.5"
+            className="inline-flex rounded-xl p-1 gap-0.5 overflow-x-auto max-w-full"
             style={{ background: '#fff', border: '1px solid #e8e3db', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
           >
             {FILTERS.map((f) => (

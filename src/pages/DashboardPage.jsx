@@ -21,7 +21,7 @@ export default function DashboardPage() {
     const tab = BRAND_TABS.find((t) => t.id === activeTab)
     return (
       <div>
-        <div className="mb-6 flex gap-1 border-b border-brand-muted">
+        <div className="mb-6 flex gap-1 border-b border-brand-muted overflow-x-auto">
           {BRAND_TABS.map((t) => (
             <button
               key={t.id}

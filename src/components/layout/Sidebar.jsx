@@ -40,7 +40,7 @@ const NAV_ALL = [
   },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen = false, onClose = () => {} }) {
   const { session, profile, role, roleLabel, signOut, refreshProfile } = useAuth()
   const fileRef   = useRef(null)
   const [uploading, setUploading] = useState(false)
@@ -66,16 +66,25 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="fixed inset-y-0 left-0 z-30 flex w-[240px] flex-col"
-      style={{ background: 'linear-gradient(180deg, #2e2208 0%, #1e1605 100%)' }}
+      className="app-sidebar fixed inset-y-0 left-0 z-30 flex w-[240px] flex-col"
+      style={{
+        background: 'linear-gradient(180deg, #2e2208 0%, #1e1605 100%)',
+        transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
+        transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
+      }}
     >
-      {/* Logo */}
-      <div className="flex h-[80px] shrink-0 items-center px-6" style={{ background: '#ffffff', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        <img
-          src={logo}
-          alt="Logo"
-          className="h-12 object-contain"
-        />
+      {/* Logo + mobile close button */}
+      <div className="flex h-[80px] shrink-0 items-center justify-between px-6" style={{ background: '#ffffff', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+        <img src={logo} alt="Logo" className="h-12 object-contain" />
+        <button
+          onClick={onClose}
+          className="flex items-center justify-center rounded-lg p-1.5 lg:hidden"
+          style={{ color: '#888', background: '#f4f4f2' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
 
       {/* Nav section label */}
@@ -93,6 +102,7 @@ export default function Sidebar() {
             to={item.to}
             end={item.end}
             className="block"
+            onClick={onClose}
           >
             {({ isActive }) => (
               <span

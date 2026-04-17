@@ -26,6 +26,11 @@ body {
 /* Sidebar scrollbar invisible */
 .sidebar-scroll::-webkit-scrollbar { width: 0; }
 
+/* Sidebar always visible on desktop regardless of isOpen state */
+@media (min-width: 1024px) {
+  .app-sidebar { transform: translateX(0) !important; }
+}
+
 /* Smooth global transitions */
 *, *::before, *::after {
   transition-property: background-color, border-color, color, box-shadow, opacity, transform;
