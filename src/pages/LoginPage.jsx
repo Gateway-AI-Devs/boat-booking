@@ -1,77 +1,172 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-
-const ROLES = [
-  { id: 'puravida-captain', label: 'PuraVida Captain',  code: 'puravida2026' },
-  { id: 'fantasea-captain', label: 'FantaSea Captain',  code: 'fantasea2026' },
-  { id: 'admin',            label: 'Admin',             code: 'admin2026'    },
-]
+import PasswordInput from '../components/ui/PasswordInput'
 
 export default function LoginPage() {
-  const { role, signIn } = useAuth()
-  const [pin, setPin]     = useState('')
-  const [error, setError] = useState('')
+  const { session, signIn } = useAuth()
+  const [email, setEmail]       = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError]       = useState('')
+  const [loading, setLoading]   = useState(false)
 
-  if (role) return <Navigate to="/" replace />
+  if (session) return <Navigate to="/" replace />
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
-    const match = ROLES.find((r) => r.code === pin.trim())
-    if (match) {
-      signIn(match.id)
-    } else {
-      setError('Incorrect access code. Try again.')
-      setPin('')
+    setError('')
+    setLoading(true)
+    try {
+      await signIn(email, password)
+    } catch {
+      setError('Incorrect email or password. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-brand-bg p-5">
-      <div className="w-full max-w-[380px] rounded-2xl border border-brand-gold bg-white px-9 py-10 text-center shadow-sm">
+    <div className="flex min-h-screen">
 
-        {/* Logo */}
+      {/* ── Left panel — brand ── */}
+      <div
+        className="hidden lg:flex w-[44%] shrink-0 flex-col items-center justify-center relative overflow-hidden"
+        style={{ background: 'linear-gradient(160deg, #1c1714 0%, #0f0d0b 100%)' }}
+      >
+        {/* Radial glow */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse 70% 50% at 60% 30%, rgba(160,125,46,0.18) 0%, transparent 70%)' }}
+        />
+
+        {/* Subtle grid texture */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center text-center px-14">
+          <img
+            src="https://assets.cdn.filesafe.space/H5rfWkaGUSkf4Mrb0wo5/media/69839edb26ea64f202a8aefc.png"
+            alt="Logo"
+            className="h-16 object-contain mb-10"
+            style={{ filter: 'brightness(0) invert(1)', opacity: 0.9 }}
+          />
+
+          <h1
+            className="text-[34px] font-normal leading-tight mb-4"
+            style={{ fontFamily: "'Playfair Display', serif", color: 'rgba(255,255,255,0.92)', letterSpacing: '-0.02em' }}
+          >
+            Captain's Schedule
+          </h1>
+
+          <p className="text-[14px] leading-relaxed max-w-[260px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Your complete view of PuraVida &amp; FantaSea bookings — all in one place.
+          </p>
+
+          {/* Decorative dots */}
+          <div className="flex items-center gap-2 mt-12">
+            <span className="h-px w-16 rounded" style={{ background: 'rgba(255,255,255,0.1)' }} />
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#a07d2e' }} />
+            <span className="h-px w-16 rounded" style={{ background: 'rgba(255,255,255,0.1)' }} />
+          </div>
+        </div>
+
+        {/* Bottom badge */}
+        <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+          <span
+            className="rounded-full px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em]"
+            style={{ background: 'rgba(160,125,46,0.15)', color: '#c9a24a', border: '1px solid rgba(160,125,46,0.25)' }}
+          >
+            Internal Use Only
+          </span>
+        </div>
+      </div>
+
+      {/* ── Right panel — form ── */}
+      <div className="flex flex-1 flex-col items-center justify-center bg-brand-bg px-8 py-12">
+
+        {/* Mobile logo */}
         <img
           src="https://assets.cdn.filesafe.space/H5rfWkaGUSkf4Mrb0wo5/media/69839edb26ea64f202a8aefc.png"
           alt="Logo"
-          className="mx-auto mb-5 h-14 object-contain"
+          className="lg:hidden h-12 object-contain mb-8"
           style={{ mixBlendMode: 'multiply' }}
         />
 
-        <h1 style={{ fontFamily: "'Playfair Display', serif" }}
-            className="text-[22px] font-normal text-[#111] mb-1.5">
-          Captain's Schedule
-        </h1>
-        <p className="mb-7 text-[13px] text-[#888]">Enter your access code to view bookings</p>
+        <div className="w-full max-w-[380px]">
+          <div className="mb-8">
+            <h2
+              className="text-[26px] font-normal"
+              style={{ fontFamily: "'Playfair Display', serif", color: '#1c1c1a', letterSpacing: '-0.02em' }}
+            >
+              Welcome back
+            </h2>
+            <p className="mt-1 text-[13.5px]" style={{ color: '#999' }}>Sign in to your account to continue</p>
+          </div>
 
-        <form onSubmit={handleSubmit}>
-          <input
-            type="password"
-            value={pin}
-            onChange={(e) => { setPin(e.target.value); setError('') }}
-            placeholder="••••••••••"
-            maxLength={30}
-            className="mb-3 w-full rounded-lg border border-brand-muted bg-[#fafaf9] px-4 py-3 text-center text-sm tracking-[0.15em] text-[#111] outline-none transition-colors focus:border-brand-gold"
-            style={{ fontFamily: "'DM Sans', sans-serif" }}
-          />
+          <form onSubmit={handleSubmit} className="space-y-4">
 
-          {error && (
-            <p className="mb-3 text-[12px] text-red-600">{error}</p>
-          )}
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] mb-2" style={{ color: '#999' }}>
+                Email address
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError('') }}
+                placeholder="captain@example.com"
+                required
+                className="w-full rounded-xl border bg-white px-4 py-3 text-[14px] outline-none"
+                style={{ borderColor: '#e2ddd5', color: '#1c1c1a', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+                onFocus={(e) => { e.target.style.borderColor = '#a07d2e'; e.target.style.boxShadow = '0 0 0 3px rgba(160,125,46,0.12)' }}
+                onBlur={(e)  => { e.target.style.borderColor = '#e2ddd5'; e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)' }}
+              />
+            </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-brand-gold py-3 text-[13px] font-medium uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#c09840]"
-            style={{ fontFamily: "'DM Sans', sans-serif" }}
-          >
-            View Schedule
-          </button>
-        </form>
+            <div>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] mb-2" style={{ color: '#999' }}>
+                Password
+              </label>
+              <PasswordInput
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError('') }}
+                placeholder="••••••••"
+                required
+                inputStyle={{ background: '#fff', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
+              />
+            </div>
 
-        <p className="mt-5 text-[11px] text-[#bbb]">
-          puravida2026 · fantasea2026 · admin2026
-        </p>
+            {error && (
+              <div
+                className="rounded-xl px-4 py-3 text-[13px]"
+                style={{ background: '#fff1f2', color: '#be123c', border: '1px solid #fecdd3' }}
+              >
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-2 w-full rounded-xl py-3.5 text-[13.5px] font-semibold uppercase tracking-[0.08em] text-white disabled:opacity-60"
+              style={{
+                background: loading ? '#a07d2e' : 'linear-gradient(135deg, #c9a24a 0%, #a07d2e 100%)',
+                boxShadow: '0 4px 14px rgba(160,125,46,0.35)',
+              }}
+              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.boxShadow = '0 6px 20px rgba(160,125,46,0.45)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 4px 14px rgba(160,125,46,0.35)' }}
+            >
+              {loading ? 'Signing in…' : 'Sign In'}
+            </button>
+          </form>
+        </div>
       </div>
+
     </div>
   )
 }

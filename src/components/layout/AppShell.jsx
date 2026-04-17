@@ -5,8 +5,10 @@ export default function AppShell() {
   return (
     <div className="flex min-h-screen bg-brand-bg">
       <Sidebar />
-      <main className="ml-56 flex-1 px-8 py-8 max-w-4xl">
-        <Outlet />
+      <main className="ml-[240px] flex-1 min-w-0">
+        <div className="max-w-3xl px-8 py-10">
+          <Outlet />
+        </div>
       </main>
     </div>
   )
