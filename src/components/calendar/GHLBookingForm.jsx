@@ -1,6 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function GHLBookingForm() {
+  const [height, setHeight] = useState(2340)
+
   useEffect(() => {
     if (document.querySelector('script[src="https://go.gatewayapp.ai/js/form_embed.js"]')) return
     const script = document.createElement('script')
@@ -9,25 +11,22 @@ export default function GHLBookingForm() {
     document.body.appendChild(script)
   }, [])
 
+  useEffect(() => {
+    function onMessage(e) {
+      const h = e.data?.frameHeight ?? e.data?.height
+      if (h && h > 100) setHeight(h)
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
+
   return (
-    <div className="flex justify-center">
-      <iframe
-        src="https://go.gatewayapp.ai/widget/form/328qcAHH4HRmpfFaQJQy"
-        style={{ width: '100%', height: '2340px', border: 'none', borderRadius: '15px' }}
-        id="inline-328qcAHH4HRmpfFaQJQy"
-        data-layout='{"id":"INLINE"}'
-        data-trigger-type="alwaysShow"
-        data-trigger-value=""
-        data-activation-type="alwaysActivated"
-        data-activation-value=""
-        data-deactivation-type="neverDeactivate"
-        data-deactivation-value=""
-        data-form-name="Internal Booking"
-        data-height="2340"
-        data-layout-iframe-id="inline-328qcAHH4HRmpfFaQJQy"
-        data-form-id="328qcAHH4HRmpfFaQJQy"
-        title="Internal Booking"
-      />
-    </div>
+    <iframe
+      src="https://go.gatewayapp.ai/widget/survey/PtCxpq58lb5Qctit3OHX"
+      style={{ border: 'none', width: '100%', height: `${height}px`, display: 'block', overflow: 'hidden' }}
+      scrolling="no"
+      id="PtCxpq58lb5Qctit3OHX"
+      title="survey"
+    />
   )
 }

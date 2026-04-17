@@ -39,7 +39,7 @@ export default function AppShell() {
           <img src={logo} alt="Logo" className="h-8 object-contain" />
         </div>
 
-        <div className="max-w-3xl px-4 py-6 sm:px-8 sm:py-10">
+        <div className="mx-auto max-w-4xl px-2 py-6 sm:px-6 sm:py-8">
           <Outlet />
         </div>
       </main>

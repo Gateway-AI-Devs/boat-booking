@@ -38,6 +38,59 @@ body {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── GHL Popup overrides ── */
+
+/* Hide the extra bottom bar / scrollbar strip */
+.lc-popup-wrapper,
+[id^="popup-"] ~ div,
+.popup-container-overlay > div:last-child:not(iframe):not(button) {
+  display: none !important;
+}
+
+/* Popup overlay — remove scroll, clean background */
+.lc-popup-wrapper,
+div[class*="popup-overlay"],
+div[class*="popup-container"],
+div[class*="lc-popup"] {
+  overflow: hidden !important;
+}
+
+/* Hide any stray horizontal scroll bar GHL adds to body */
+body:has(div[class*="popup"]) {
+  overflow: hidden !important;
+}
+
+/* Close button — make it bigger and nicer */
+button[class*="popup-close"],
+button[id*="popup-close"],
+.lc-popup-close,
+[aria-label="Close"] {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  border: 1.5px solid #e2ddd5 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: background 0.15s, box-shadow 0.15s !important;
+}
+button[class*="popup-close"]:hover,
+.lc-popup-close:hover,
+[aria-label="Close"]:hover {
+  background: #f4f4f2 !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.16) !important;
+}
+button[class*="popup-close"] svg,
+.lc-popup-close svg,
+[aria-label="Close"] svg {
+  width: 16px !important;
+  height: 16px !important;
+  stroke-width: 2.5 !important;
+}
+
 /* React Big Calendar overrides (kept for any calendar remnants) */
 .rbc-calendar { font-family: inherit; background: #f4f4f2; }
 .rbc-toolbar button {
