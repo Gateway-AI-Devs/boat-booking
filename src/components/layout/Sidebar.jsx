@@ -1,149 +1,51 @@
-import { useRef, useState, useEffect } from 'react'
-import { NavLink, Link, useLocation } from 'react-router-dom'
+import { useRef, useState } from 'react'
+import { NavLink, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import Avatar from '../ui/Avatar'
 import { uploadAvatar } from '../../lib/storage'
 import logo from '../../assets/Logo-oneway-ibiza-main.png'
 
-const NAV_GROUPS = [
+const NAV_ALL = [
   {
-    id: 'internal',
-    label: 'Internal Bookings',
+    to: '/', end: true,
+    label: 'Schedule',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2.5"/>
         <path d="M16 2v4M8 2v4M3 10h18"/>
       </svg>
     ),
-    items: [
-      {
-        to: '/', end: true,
-        label: 'Schedule',
-        icon: (
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2.5"/>
-            <path d="M16 2v4M8 2v4M3 10h18"/>
-          </svg>
-        ),
-      },
-      {
-        to: '/new-booking', end: false,
-        label: 'New Booking',
-        icon: (
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M5 12h14"/>
-            <rect x="3" y="3" width="18" height="18" rx="2.5"/>
-          </svg>
-        ),
-      },
-      {
-        to: '/users', end: false, adminOnly: true,
-        label: 'Team',
-        icon: (
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-          </svg>
-        ),
-      },
-    ],
   },
   {
-    id: 'enquiries',
-    label: 'Enquiries',
+    to: '/new-booking', end: false,
+    label: 'New Booking',
     icon: (
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 5v14M5 12h14"/>
+        <rect x="3" y="3" width="18" height="18" rx="2.5"/>
       </svg>
     ),
-    items: [
-      {
-        to: '/enquiries/club-tickets', end: false,
-        label: 'Club Tickets & VIP Tickets',
-        icon: (
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 9a3 3 0 1 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 1 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/>
-          </svg>
-        ),
-      },
-      {
-        to: '/enquiries/villas-hotel', end: false,
-        label: 'Villas & Hotel',
-        icon: (
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-        ),
-      },
-      {
-        to: '/enquiries/island-transfer', end: false,
-        label: 'Island Transfer',
-        icon: (
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 17l4-8 4 4 4-6 4 10H3z"/>
-            <path d="M3 20h18"/>
-          </svg>
-        ),
-      },
-      {
-        to: '/enquiries/car-hire', end: false,
-        label: 'Car Hire',
-        icon: (
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 17H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h13l4 4v4a2 2 0 0 1-2 2h-2"/>
-            <circle cx="7.5" cy="17.5" r="2.5"/>
-            <circle cx="17.5" cy="17.5" r="2.5"/>
-          </svg>
-        ),
-      },
-    ],
+  },
+  {
+    to: '/users', end: false, adminOnly: true,
+    label: 'Team',
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
   },
 ]
 
-function ChevronIcon({ open }) {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{
-        transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
-        transition: 'transform 0.2s ease',
-        flexShrink: 0,
-      }}
-    >
-      <polyline points="9 18 15 12 9 6"/>
-    </svg>
-  )
-}
-
 export default function Sidebar({ isOpen = false, onClose = () => {} }) {
   const { session, profile, role, roleLabel, signOut, refreshProfile } = useAuth()
-  const { pathname } = useLocation()
-  const fileRef = useRef(null)
+  const fileRef   = useRef(null)
   const [uploading, setUploading] = useState(false)
-  const [openGroups, setOpenGroups] = useState({
-    internal: true,
-    enquiries: pathname.startsWith('/enquiries'),
-  })
 
-  useEffect(() => {
-    if (pathname.startsWith('/enquiries')) {
-      setOpenGroups(prev => ({ ...prev, enquiries: true }))
-    }
-  }, [pathname])
-
-  function toggleGroup(id) {
-    setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }))
-  }
+  const links = NAV_ALL.filter((n) => !n.adminOnly || role === 'admin')
 
   async function handleAvatarChange(e) {
     const file = e.target.files?.[0]
@@ -188,77 +90,48 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
       {/* Nav section label */}
       <div className="px-5 pb-1.5 pt-6">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.25)' }}>
-          Navigation
+          Internal Bookings
         </p>
       </div>
 
-      {/* Nav groups */}
+      {/* Nav links */}
       <nav className="sidebar-scroll flex-1 overflow-y-auto px-3 space-y-0.5 pb-4">
-        {NAV_GROUPS.map((group) => {
-          const visibleItems = group.items.filter(item => !item.adminOnly || role === 'admin')
-          const isOpen = openGroups[group.id]
-
-          return (
-            <div key={group.id}>
-              {/* Group header / toggle */}
-              <button
-                onClick={() => toggleGroup(group.id)}
-                className="w-full flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13px] font-semibold select-none cursor-pointer"
-                style={{ color: 'rgba(255,255,255,0.65)', background: 'transparent' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.9)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)' }}
+        {links.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className="block"
+            onClick={onClose}
+          >
+            {({ isActive }) => (
+              <span
+                className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13.5px] font-medium select-none cursor-pointer"
+                style={
+                  isActive
+                    ? { background: 'rgba(160,125,46,0.18)', color: '#c9a24a' }
+                    : { color: 'rgba(255,255,255,0.5)' }
+                }
+                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)' }}
+                onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'rgba(255,255,255,0.5)' } }}
               >
-                <span style={{ color: 'rgba(255,255,255,0.35)' }}>{group.icon}</span>
-                <span className="flex-1 text-left">{group.label}</span>
-                <span style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  <ChevronIcon open={isOpen} />
+                <span style={{ color: isActive ? '#c9a24a' : 'rgba(255,255,255,0.3)' }}>
+                  {item.icon}
                 </span>
-              </button>
-
-              {/* Group items */}
-              {isOpen && (
-                <div className="mt-0.5 space-y-0.5" style={{ paddingLeft: '10px' }}>
-                  {visibleItems.map((item) => (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      end={item.end}
-                      className="block"
-                      onClick={onClose}
-                    >
-                      {({ isActive }) => (
-                        <span
-                          className="flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium select-none cursor-pointer"
-                          style={
-                            isActive
-                              ? { background: 'rgba(160,125,46,0.18)', color: '#c9a24a' }
-                              : { color: 'rgba(255,255,255,0.45)' }
-                          }
-                          onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)' } }}
-                          onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'rgba(255,255,255,0.45)' } }}
-                        >
-                          <span style={{ color: isActive ? '#c9a24a' : 'rgba(255,255,255,0.25)' }}>
-                            {item.icon}
-                          </span>
-                          {item.label}
-                          {isActive && (
-                            <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#c9a24a' }} />
-                          )}
-                        </span>
-                      )}
-                    </NavLink>
-                  ))}
-                </div>
-              )}
-            </div>
-          )
-        })}
+                {item.label}
+                {isActive && (
+                  <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: '#c9a24a' }} />
+                )}
+              </span>
+            )}
+          </NavLink>
+        ))}
       </nav>
 
       {/* Divider */}
       <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', margin: '0 16px' }} />
 
-      {/* User footer */}
+      {/* User footer — horizontal: avatar → name/role → sign out */}
       <div className="shrink-0 flex items-center gap-3 px-4 py-3.5">
 
         {/* Avatar with upload overlay */}

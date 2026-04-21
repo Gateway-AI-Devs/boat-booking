@@ -7,7 +7,6 @@ import DashboardPage from './pages/DashboardPage'
 import NewBookingPage from './pages/NewBookingPage'
 import UsersPage from './pages/UsersPage'
 import ProfilePage from './pages/ProfilePage'
-import EnquiryFormPage from './pages/EnquiryFormPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 export default function App() {
@@ -22,10 +21,6 @@ export default function App() {
               <Route path="/"            element={<DashboardPage />} />
               <Route path="/new-booking" element={<NewBookingPage />} />
               <Route path="/profile"     element={<ProfilePage />} />
-              <Route path="/enquiries/club-tickets"   element={<EnquiryFormPage />} />
-              <Route path="/enquiries/villas-hotel"   element={<EnquiryFormPage />} />
-              <Route path="/enquiries/island-transfer" element={<EnquiryFormPage />} />
-              <Route path="/enquiries/car-hire"       element={<EnquiryFormPage />} />
               <Route
                 path="/users"
                 element={
