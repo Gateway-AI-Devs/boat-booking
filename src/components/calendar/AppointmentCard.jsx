@@ -15,11 +15,11 @@ export default function AppointmentCard({ appt, showContact = false }) {
   const time   = dt.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
   const endTime = endDt.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
 
-  const title   = appt.title ?? appt.name ?? appt.eventTitle ?? 'Booking'
-  const cObj    = appt.contact ?? {}
-  const contact = cObj.name || (cObj.firstName ? `${cObj.firstName} ${cObj.lastName ?? ''}`.trim() : '') || appt.contactName || ''
-  const phone   = cObj.phone ?? appt.phone ?? ''
-  const email   = cObj.email ?? appt.email ?? ''
+  const title         = appt.title ?? appt.name ?? appt.eventTitle ?? 'Booking'
+  const cObj          = appt.contact ?? {}
+  const phone         = cObj.phone ?? appt.phone ?? ''
+  const email         = cObj.email ?? appt.email ?? ''
+  const numberOfGuests = appt.numberOfGuests ?? null
   const status  = (appt.appointmentStatus ?? appt.status ?? 'confirmed').toLowerCase()
   const s       = STATUS[status] ?? STATUS.pending
 
@@ -76,12 +76,14 @@ export default function AppointmentCard({ appt, showContact = false }) {
             </svg>
             {time} – {endTime}
           </span>
-          {contact && (
+          {numberOfGuests != null && (
             <span className="flex items-center gap-1.5 text-[12.5px]" style={{ color: '#888' }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
-              {contact}
+              {numberOfGuests} guest{numberOfGuests !== '1' ? 's' : ''}
             </span>
           )}
         </div>

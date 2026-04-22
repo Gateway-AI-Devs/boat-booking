@@ -39,11 +39,8 @@ export async function fetchCalendarEvents({ calendarId, locationId, startTime, e
   const data = await res.json()
   const events = data.events ?? data.appointments ?? data.items ?? data.data ?? []
 
-  // Collect unique contactIds that are missing phone/email
-  const needsEnrich = events.filter(
-    (e) => e.contactId && !(e.contact?.phone || e.contact?.email)
-  )
-  const uniqueIds = [...new Set(needsEnrich.map((e) => e.contactId))]
+  // Collect all unique contactIds so we can always get custom fields
+  const uniqueIds = [...new Set(events.filter((e) => e.contactId).map((e) => e.contactId))]
 
   if (uniqueIds.length === 0) return events
 
@@ -53,12 +50,20 @@ export async function fetchCalendarEvents({ calendarId, locationId, startTime, e
     uniqueIds.map((id, i) => [id, contacts[i]]).filter(([, c]) => c)
   )
 
+  const GUESTS_FIELD_ID = 'WVXo4yNQ40VRNzFDFm0m'
+
   // Merge contact data into events
   return events.map((e) => {
     const enriched = contactMap[e.contactId]
     if (!enriched) return e
+    if (enriched.customFields?.length) console.log('[GHL] customFields for', e.contactId, enriched.customFields)
+    const guestsField = (enriched.customFields ?? []).find(
+      (f) => f.id === GUESTS_FIELD_ID || f.fieldId === GUESTS_FIELD_ID
+    )
+    const numberOfGuests = guestsField?.value ?? guestsField?.fieldValue ?? null
     return {
       ...e,
+      numberOfGuests,
       contact: {
         name:      enriched.name      ?? enriched.firstName ? `${enriched.firstName} ${enriched.lastName ?? ''}`.trim() : '',
         firstName: enriched.firstName ?? '',
