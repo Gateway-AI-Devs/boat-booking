@@ -2,12 +2,13 @@ import { useState } from 'react'
 import AppointmentList from '../components/calendar/AppointmentList'
 
 const TABS = [
+  { id: 'all',      label: 'All',      icon: '🗓' },
   { id: 'puravida', label: 'PuraVida', icon: '🌿' },
   { id: 'fantasea', label: 'FantaSea', icon: '🌊' },
 ]
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState('puravida')
+  const [activeTab, setActiveTab] = useState('all')
 
   const puravidaId  = import.meta.env.VITE_GHL_PURAVIDA_CALENDAR_ID
   const fantaseasId = import.meta.env.VITE_GHL_FANTASEA_CALENDAR_ID
@@ -40,6 +41,12 @@ export default function AdminPage() {
         ))}
       </div>
 
+      {activeTab === 'all' && (
+        <AppointmentList
+          calendarIds={[puravidaId, fantaseasId]}
+          title="All Bookings"
+        />
+      )}
       {activeTab === 'puravida' && (
         <AppointmentList calendarId={puravidaId} title="PuraVida Bookings" />
       )}

@@ -39,9 +39,9 @@ function applyFilter(appts, filter) {
     .sort((a, b) => new Date(a.startTime ?? a.start) - new Date(b.startTime ?? b.start))
 }
 
-export default function AppointmentList({ calendarId, title, showGreeting = true }) {
-  const { profile } = useAuth()
-  const { appointments, loading, error } = useCalendarEvents(calendarId)
+export default function AppointmentList({ calendarId, calendarIds, title, showGreeting = true }) {
+  const { profile, role } = useAuth()
+  const { appointments, loading, error } = useCalendarEvents(calendarIds ?? calendarId)
   const [filter, setFilter] = useState('upcoming')
   const [search, setSearch] = useState('')
 
@@ -189,7 +189,7 @@ export default function AppointmentList({ calendarId, title, showGreeting = true
       {!loading && !error && filtered.length > 0 && (
         <div className="flex flex-col gap-3">
           {filtered.map((appt) => (
-            <AppointmentCard key={appt.id ?? appt.startTime} appt={appt} />
+            <AppointmentCard key={appt.id ?? appt.startTime} appt={appt} showContact={role === 'admin'} />
           ))}
         </div>
       )}

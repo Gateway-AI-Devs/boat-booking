@@ -2,9 +2,13 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import AppointmentList from '../components/calendar/AppointmentList'
 
+const PURAVIDA_ID = import.meta.env.VITE_GHL_PURAVIDA_CALENDAR_ID
+const FANTASEA_ID = import.meta.env.VITE_GHL_FANTASEA_CALENDAR_ID
+
 const BRAND_TABS = [
-  { id: 'puravida', label: 'PuraVida', icon: '🌿', calendarId: import.meta.env.VITE_GHL_PURAVIDA_CALENDAR_ID },
-  { id: 'fantasea', label: 'FantaSea', icon: '🌊', calendarId: import.meta.env.VITE_GHL_FANTASEA_CALENDAR_ID },
+  { id: 'all',      label: 'All',      icon: '🗓', calendarIds: [PURAVIDA_ID, FANTASEA_ID] },
+  { id: 'puravida', label: 'PuraVida', icon: '🌿', calendarId: PURAVIDA_ID },
+  { id: 'fantasea', label: 'FantaSea', icon: '🌊', calendarId: FANTASEA_ID },
 ]
 
 const CAPTAIN_CALENDAR = {
@@ -14,7 +18,7 @@ const CAPTAIN_CALENDAR = {
 
 export default function DashboardPage() {
   const { role } = useAuth()
-  const [activeTab, setActiveTab] = useState('puravida')
+  const [activeTab, setActiveTab] = useState('all')
 
   // Admin sees both brands via tabs
   if (role === 'admin') {
@@ -37,7 +41,11 @@ export default function DashboardPage() {
             </button>
           ))}
         </div>
-        <AppointmentList calendarId={tab.calendarId} title={`${tab.label} Bookings`} />
+        <AppointmentList
+          calendarIds={tab.calendarIds}
+          calendarId={tab.calendarId}
+          title={`${tab.label} Bookings`}
+        />
       </div>
     )
   }

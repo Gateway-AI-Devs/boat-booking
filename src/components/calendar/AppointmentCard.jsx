@@ -6,7 +6,7 @@ const STATUS = {
   'no-show':  { bg: '#fff1f2', color: '#be123c', dot: '#f43f5e', label: 'No-show'   },
 }
 
-export default function AppointmentCard({ appt }) {
+export default function AppointmentCard({ appt, showContact = false }) {
   const dt     = new Date(appt.startTime ?? appt.start ?? appt.appointmentTime)
   const endDt  = new Date(appt.endTime   ?? appt.end   ?? dt.getTime() + 3600000)
   const day    = dt.getDate()
@@ -86,8 +86,8 @@ export default function AppointmentCard({ appt }) {
           )}
         </div>
 
-        {/* Contact details */}
-        {(phone || email) && (
+        {/* Contact details — admin only */}
+        {showContact && (phone || email) && (
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1" style={{ borderTop: '1px dashed #f0ebe3', paddingTop: '8px' }}>
             {phone && (
               <a
