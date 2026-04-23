@@ -38,6 +38,7 @@ export async function fetchCalendarEvents({ calendarId, locationId, startTime, e
 
   const data = await res.json()
   const events = data.events ?? data.appointments ?? data.items ?? data.data ?? []
+  if (events.length > 0) console.log('[GHL] raw event sample', JSON.stringify(events[0], null, 2))
 
   // Collect all unique contactIds so we can always get custom fields
   const uniqueIds = [...new Set(events.filter((e) => e.contactId).map((e) => e.contactId))]
@@ -50,22 +51,55 @@ export async function fetchCalendarEvents({ calendarId, locationId, startTime, e
     uniqueIds.map((id, i) => [id, contacts[i]]).filter(([, c]) => c)
   )
 
-  const GUESTS_FIELD_ID = 'WVXo4yNQ40VRNzFDFm0m'
+  const CUSTOM_FIELDS = {
+    boat:              'NZOqzQUxQL6ldTnIXPki',
+    timeSlot:          'FWauLNmJYGKiiZRTKYSL',
+    package:           'eVhK0he8FdQg8P0UYyB3',
+    season:            'PU79ma3hTAYNg2snbFHj',
+    date:              'qD26KYH1zQa52uMCNYHw',
+    guests:            'WVXo4yNQ40VRNzFDFm0m',
+    notes:             '8lgFS1WHLeg82xQP2yyN',
+    depositAmount:     'TVbici5uQ9tI12HSTyj3',
+    totalPackageValue: 'LTz2GL8Qc0DTRHP6B8Bp',
+  }
+
+  const UPSELL_FIELDS = [
+    { key: 'djDecks',          id: 'WGB43kgq4j1MIvKPAJfR', label: 'DJ Decks'               },
+    { key: 'jetSki',           id: 'Hja2qmE2cuOWgk68omJ3', label: 'Jet Ski Hire'            },
+    { key: 'islandTransfers',  id: '7rMtrXfgQouKlEn3lZEw', label: 'Island Transfers'        },
+    { key: 'clubPackage',      id: 'AQ3b66J7a4dQ5NLJQEYq', label: 'Club Package / Tickets'  },
+    { key: 'villa',            id: '9ERNIsMps7MywQvXwC4c', label: 'Villa'                   },
+  ]
 
   // Merge contact data into events
   return events.map((e) => {
     const enriched = contactMap[e.contactId]
     if (!enriched) return e
-    if (enriched.customFields?.length) console.log('[GHL] customFields for', e.contactId, enriched.customFields)
-    const guestsField = (enriched.customFields ?? []).find(
-      (f) => f.id === GUESTS_FIELD_ID || f.fieldId === GUESTS_FIELD_ID
+
+    console.log('[GHL] contact customFields for', e.contactId, enriched.customFields)
+    const fields = enriched.customFields ?? []
+    const pick = (id) => {
+      const f = fields.find((f) => f.id === id || f.fieldId === id)
+      return f?.value ?? f?.fieldValue ?? null
+    }
+
+    const customData = Object.fromEntries(
+      Object.entries(CUSTOM_FIELDS).map(([key, id]) => [key, pick(id)])
     )
-    const numberOfGuests = guestsField?.value ?? guestsField?.fieldValue ?? null
+
+    const upsells = UPSELL_FIELDS
+      .filter(({ id }) => {
+        const val = pick(id)
+        return val === true || val === 'true'
+      })
+      .map(({ label }) => label)
+
     return {
       ...e,
-      numberOfGuests,
+      customData,
+      upsells,
       contact: {
-        name:      enriched.name      ?? enriched.firstName ? `${enriched.firstName} ${enriched.lastName ?? ''}`.trim() : '',
+        name:      enriched.name ?? (enriched.firstName ? `${enriched.firstName} ${enriched.lastName ?? ''}`.trim() : ''),
         firstName: enriched.firstName ?? '',
         lastName:  enriched.lastName  ?? '',
         email:     enriched.email     ?? '',
