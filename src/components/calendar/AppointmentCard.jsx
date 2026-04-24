@@ -1,19 +1,4 @@
-const STATUS = {
-  confirmed: { bg: '#f0faf1', color: '#1e7e34', dot: '#22c55e', label: 'Confirmed' },
-  cancelled:  { bg: '#fff1f2', color: '#be123c', dot: '#f43f5e', label: 'Cancelled'  },
-  pending:    { bg: '#fffbeb', color: '#b45309', dot: '#f59e0b', label: 'Pending'    },
-  showed:     { bg: '#f0faf1', color: '#1e7e34', dot: '#22c55e', label: 'Showed'     },
-  'no-show':  { bg: '#fff1f2', color: '#be123c', dot: '#f43f5e', label: 'No-show'   },
-}
-
-function InfoRow({ icon, children }) {
-  return (
-    <span className="flex items-center gap-1.5 text-[12.5px]" style={{ color: '#888' }}>
-      {icon}
-      {children}
-    </span>
-  )
-}
+import { STATUS } from '../../constants/appointmentStatus'
 
 const ICONS = {
   clock: (
@@ -51,6 +36,15 @@ const ICONS = {
   ),
 }
 
+function InfoRow({ icon, children }) {
+  return (
+    <span className="flex items-center gap-1.5 text-[12.5px]" style={{ color: '#888' }}>
+      {icon}
+      {children}
+    </span>
+  )
+}
+
 export default function AppointmentCard({ appt, showContact = false }) {
   const dt      = new Date(appt.startTime ?? appt.start ?? appt.appointmentTime)
   const endDt   = new Date(appt.endTime   ?? appt.end   ?? dt.getTime() + 3600000)
@@ -79,14 +73,14 @@ export default function AppointmentCard({ appt, showContact = false }) {
         transition: 'box-shadow 0.2s, border-color 0.2s, transform 0.15s',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(160,125,46,0.10), 0 2px 6px rgba(0,0,0,0.05)'
+        e.currentTarget.style.boxShadow  = '0 8px 24px rgba(160,125,46,0.10), 0 2px 6px rgba(0,0,0,0.05)'
         e.currentTarget.style.borderColor = '#d4b96a'
-        e.currentTarget.style.transform = 'translateY(-1px)'
+        e.currentTarget.style.transform  = 'translateY(-1px)'
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03)'
+        e.currentTarget.style.boxShadow  = '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03)'
         e.currentTarget.style.borderColor = '#ede8e0'
-        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.transform  = 'translateY(0)'
       }}
     >
       {/* Gold left accent bar */}
@@ -117,14 +111,12 @@ export default function AppointmentCard({ appt, showContact = false }) {
           {title}
         </p>
 
-        {/* Row 1: time + guests */}
+        {/* Row 1: booking metadata */}
         <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
           {cd.guests != null && (
-            <InfoRow icon={ICONS.guests}>
-              {cd.guests} guest{cd.guests !== '1' ? 's' : ''}
-            </InfoRow>
+            <InfoRow icon={ICONS.guests}>{cd.guests} guest{cd.guests !== '1' ? 's' : ''}</InfoRow>
           )}
-          {cd.boat && <InfoRow icon={ICONS.boat}>{cd.boat}</InfoRow>}
+          {cd.boat    && <InfoRow icon={ICONS.boat}>{cd.boat}</InfoRow>}
           {cd.package && <InfoRow icon={ICONS.package}>{cd.package}</InfoRow>}
           {cd.timeSlot && (
             <InfoRow icon={
@@ -136,7 +128,8 @@ export default function AppointmentCard({ appt, showContact = false }) {
           {cd.season && (
             <InfoRow icon={
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
                 <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
                 <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
                 <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
@@ -148,12 +141,8 @@ export default function AppointmentCard({ appt, showContact = false }) {
         {/* Row 2: financials */}
         {(cd.depositAmount || cd.totalPackageValue) && (
           <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
-            {cd.depositAmount && (
-              <InfoRow icon={ICONS.money}>Deposit: {cd.depositAmount}</InfoRow>
-            )}
-            {showContact && cd.totalPackageValue && (
-              <InfoRow icon={ICONS.money}>Total: {cd.totalPackageValue}</InfoRow>
-            )}
+            {cd.depositAmount && <InfoRow icon={ICONS.money}>Deposit: {cd.depositAmount}</InfoRow>}
+            {showContact && cd.totalPackageValue && <InfoRow icon={ICONS.money}>Total: {cd.totalPackageValue}</InfoRow>}
           </div>
         )}
 
@@ -183,10 +172,7 @@ export default function AppointmentCard({ appt, showContact = false }) {
         {showContact && (phone || email) && (
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1" style={{ borderTop: '1px dashed #f0ebe3', paddingTop: '8px' }}>
             {phone && (
-              <a
-                href={`tel:${phone}`}
-                className="flex items-center gap-1.5 text-[12px]"
-                style={{ color: '#a07d2e', textDecoration: 'none' }}
+              <a href={`tel:${phone}`} className="flex items-center gap-1.5 text-[12px]" style={{ color: '#a07d2e', textDecoration: 'none' }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = '#7a5f22' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = '#a07d2e' }}
               >
@@ -197,10 +183,7 @@ export default function AppointmentCard({ appt, showContact = false }) {
               </a>
             )}
             {email && (
-              <a
-                href={`mailto:${email}`}
-                className="flex items-center gap-1.5 text-[12px]"
-                style={{ color: '#a07d2e', textDecoration: 'none' }}
+              <a href={`mailto:${email}`} className="flex items-center gap-1.5 text-[12px]" style={{ color: '#a07d2e', textDecoration: 'none' }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = '#7a5f22' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = '#a07d2e' }}
               >
@@ -215,12 +198,10 @@ export default function AppointmentCard({ appt, showContact = false }) {
         )}
       </div>
 
-      {/* Status */}
+      {/* Status badge */}
       <div className="shrink-0 self-start flex items-center gap-1.5 rounded-full px-3 py-1" style={{ background: s.bg }}>
         <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: s.dot }} />
-        <span className="text-[11px] font-semibold uppercase tracking-[0.06em]" style={{ color: s.color }}>
-          {s.label}
-        </span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.06em]" style={{ color: s.color }}>{s.label}</span>
       </div>
     </div>
   )

@@ -1,26 +1,12 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import AppointmentList from '../components/calendar/AppointmentList'
-
-const PURAVIDA_ID = import.meta.env.VITE_GHL_PURAVIDA_CALENDAR_ID
-const FANTASEA_ID = import.meta.env.VITE_GHL_FANTASEA_CALENDAR_ID
-
-const BRAND_TABS = [
-  { id: 'all',      label: 'All',      icon: '🗓', calendarIds: [PURAVIDA_ID, FANTASEA_ID] },
-  { id: 'puravida', label: 'PuraVida', icon: '🌿', calendarId: PURAVIDA_ID },
-  { id: 'fantasea', label: 'FantaSea', icon: '🌊', calendarId: FANTASEA_ID },
-]
-
-const CAPTAIN_CALENDAR = {
-  'puravida-captain': { calendarId: import.meta.env.VITE_GHL_PURAVIDA_CALENDAR_ID, title: 'PuraVida Bookings' },
-  'fantasea-captain': { calendarId: import.meta.env.VITE_GHL_FANTASEA_CALENDAR_ID, title: 'FantaSea Bookings' },
-}
+import { BRAND_TABS, CAPTAIN_CALENDAR } from '../constants/brands'
 
 export default function DashboardPage() {
   const { role } = useAuth()
   const [activeTab, setActiveTab] = useState('all')
 
-  // Admin sees both brands via tabs
   if (role === 'admin') {
     const tab = BRAND_TABS.find((t) => t.id === activeTab)
     return (
@@ -30,11 +16,10 @@ export default function DashboardPage() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`flex items-center gap-2 -mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-                activeTab === t.id
+              className={`flex items-center gap-2 -mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === t.id
                   ? 'border-brand-gold text-brand-gold'
                   : 'border-transparent text-[#888] hover:text-brand-text'
-              }`}
+                }`}
             >
               <span>{t.icon}</span>
               {t.label}
@@ -50,7 +35,6 @@ export default function DashboardPage() {
     )
   }
 
-  // Captains see their single calendar
   const captain = CAPTAIN_CALENDAR[role]
   return <AppointmentList calendarId={captain?.calendarId} title={captain?.title} />
 }

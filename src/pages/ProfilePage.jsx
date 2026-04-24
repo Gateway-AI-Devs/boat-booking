@@ -2,88 +2,29 @@ import { useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { uploadAvatar } from '../lib/storage'
 import { useAuth } from '../context/AuthContext'
+import { ROLE_META } from '../constants/roles'
 import Avatar from '../components/ui/Avatar'
 import Spinner from '../components/ui/Spinner'
 import PasswordInput from '../components/ui/PasswordInput'
-
-const ROLE_META = {
-  'puravida-captain': { label: 'PuraVida Captain', bg: '#f0faf1', color: '#1e7e34' },
-  'fantasea-captain': { label: 'FantaSea Captain', bg: '#eff6ff', color: '#1d4ed8' },
-  'admin':            { label: 'Admin',            bg: '#fffbeb', color: '#b45309' },
-}
-
-function Section({ title, subtitle, children }) {
-  return (
-    <div
-      className="rounded-2xl bg-white p-7"
-      style={{ border: '1px solid #ede8e0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-    >
-      <div className="mb-6" style={{ borderBottom: '1px solid #f2ede6', paddingBottom: '20px' }}>
-        <h2 className="text-[15px] font-semibold" style={{ color: '#1c1c1a' }}>{title}</h2>
-        {subtitle && <p className="mt-0.5 text-[13px]" style={{ color: '#aaa' }}>{subtitle}</p>}
-      </div>
-      {children}
-    </div>
-  )
-}
-
-function Field({ label, children }) {
-  return (
-    <div>
-      <label className="block text-[11px] font-semibold uppercase tracking-[0.14em] mb-2" style={{ color: '#999' }}>
-        {label}
-      </label>
-      {children}
-    </div>
-  )
-}
-
-function Input({ ...props }) {
-  return (
-    <input
-      {...props}
-      className="w-full rounded-xl border bg-[#fafaf9] px-4 py-3 text-[14px] outline-none"
-      style={{ borderColor: '#e2ddd5', color: '#1c1c1a' }}
-      onFocus={(e) => { e.target.style.borderColor = '#a07d2e'; e.target.style.boxShadow = '0 0 0 3px rgba(160,125,46,0.12)' }}
-      onBlur={(e)  => { e.target.style.borderColor = '#e2ddd5'; e.target.style.boxShadow = 'none' }}
-    />
-  )
-}
-
-function Toast({ type, message }) {
-  if (!message) return null
-  const styles = {
-    success: { bg: '#f0faf1', color: '#1e7e34', border: '#bbf7d0' },
-    error:   { bg: '#fff1f2', color: '#be123c', border: '#fecdd3' },
-  }
-  const s = styles[type]
-  return (
-    <div
-      className="rounded-xl px-4 py-3 text-[13px] font-medium"
-      style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
-    >
-      {message}
-    </div>
-  )
-}
+import Section from '../components/ui/Section'
+import Field from '../components/ui/Field'
+import Input from '../components/ui/Input'
+import FormMessage from '../components/ui/FormMessage'
 
 export default function ProfilePage() {
   const { session, profile, refreshProfile } = useAuth()
   const fileRef = useRef(null)
 
-  // Info form
-  const [fullName, setFullName]     = useState(profile?.full_name ?? '')
+  const [fullName, setFullName] = useState(profile?.full_name ?? '')
   const [infoSaving, setInfoSaving] = useState(false)
-  const [infoMsg,    setInfoMsg]    = useState({ type: '', text: '' })
+  const [infoMsg, setInfoMsg] = useState({ type: '', text: '' })
 
-  // Password form
-  const [currentPw, setCurrentPw]   = useState('')
-  const [newPw,     setNewPw]       = useState('')
-  const [confirmPw, setConfirmPw]   = useState('')
-  const [pwSaving,  setPwSaving]    = useState(false)
-  const [pwMsg,     setPwMsg]       = useState({ type: '', text: '' })
+  const [currentPw, setCurrentPw] = useState('')
+  const [newPw, setNewPw] = useState('')
+  const [confirmPw, setConfirmPw] = useState('')
+  const [pwSaving, setPwSaving] = useState(false)
+  const [pwMsg, setPwMsg] = useState({ type: '', text: '' })
 
-  // Avatar
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [avatarSrc, setAvatarSrc] = useState(profile?.avatar_url)
 
@@ -131,7 +72,6 @@ export default function ProfilePage() {
       return
     }
     setPwSaving(true)
-    // Re-authenticate to verify current password
     const { error: reAuthError } = await supabase.auth.signInWithPassword({
       email: session.user.email,
       password: currentPw,
@@ -153,7 +93,6 @@ export default function ProfilePage() {
 
   return (
     <div>
-      {/* Page header */}
       <div className="mb-8">
         <h1
           className="text-[30px] leading-tight font-normal"
@@ -166,7 +105,7 @@ export default function ProfilePage() {
 
       <div className="space-y-5">
 
-        {/* ── Avatar section ── */}
+        {/* Avatar */}
         <Section title="Photo" subtitle="Click your avatar to upload a new photo">
           <div className="flex items-center gap-6">
             <button
@@ -176,14 +115,14 @@ export default function ProfilePage() {
               title="Change photo"
             >
               <Avatar src={avatarSrc} name={profile?.full_name} email={profile?.email} size="xl"
-                      className={avatarUploading ? 'opacity-60' : ''} />
+                className={avatarUploading ? 'opacity-60' : ''} />
               <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/35 opacity-0 group-hover:opacity-100">
                 {avatarUploading
                   ? <Spinner size="sm" />
                   : <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                      <circle cx="12" cy="13" r="4" fill="white"/>
-                    </svg>
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" fill="white" />
+                  </svg>
                 }
               </span>
             </button>
@@ -204,25 +143,19 @@ export default function ProfilePage() {
           </div>
         </Section>
 
-        {/* ── Profile info ── */}
+        {/* Personal info */}
         <Section title="Personal Information" subtitle="Update your display name">
           <form onSubmit={handleInfoSave} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Full name">
-                <Input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Your full name"
-                />
+                <Input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" />
               </Field>
               <Field label="Email address">
-                <Input type="email" value={profile?.email ?? ''} readOnly
-                  style={{ opacity: 0.6, cursor: 'not-allowed' }} />
+                <Input type="email" value={profile?.email ?? ''} readOnly style={{ opacity: 0.6, cursor: 'not-allowed' }} />
               </Field>
             </div>
 
-            <Toast type={infoMsg.type} message={infoMsg.text} />
+            <FormMessage type={infoMsg.type} message={infoMsg.text} />
 
             <div className="flex justify-end">
               <button
@@ -237,7 +170,7 @@ export default function ProfilePage() {
           </form>
         </Section>
 
-        {/* ── Change password ── */}
+        {/* Change password */}
         <Section title="Change Password" subtitle="Use a strong password of at least 6 characters">
           <form onSubmit={handlePasswordSave} className="space-y-4">
             <Field label="Current password">
@@ -252,7 +185,7 @@ export default function ProfilePage() {
               </Field>
             </div>
 
-            <Toast type={pwMsg.type} message={pwMsg.text} />
+            <FormMessage type={pwMsg.type} message={pwMsg.text} />
 
             <div className="flex justify-end">
               <button

@@ -3,41 +3,14 @@ import { useCalendarEvents } from '../../hooks/useCalendarEvents'
 import { useAuth } from '../../context/AuthContext'
 import AppointmentCard from './AppointmentCard'
 import Spinner from '../ui/Spinner'
+import { greeting, formattedDate, applyFilter } from '../../utils/dateUtils'
 
 const FILTERS = [
-  { id: 'upcoming', label: 'Upcoming' },
-  { id: 'today',    label: 'Today'    },
+  { id: 'upcoming', label: 'Upcoming'  },
+  { id: 'today',    label: 'Today'     },
   { id: 'week',     label: 'This week' },
-  { id: 'all',      label: 'All'      },
+  { id: 'all',      label: 'All'       },
 ]
-
-function greeting() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
-function formattedDate() {
-  return new Date().toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
-}
-
-function applyFilter(appts, filter) {
-  const now        = new Date()
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const todayEnd   = new Date(todayStart.getTime() + 86_400_000)
-  const weekEnd    = new Date(todayStart.getTime() + 7 * 86_400_000)
-
-  return appts
-    .filter((a) => {
-      const t = new Date(a.startTime ?? a.start ?? a.appointmentTime)
-      if (filter === 'today')    return t >= todayStart && t < todayEnd
-      if (filter === 'week')     return t >= todayStart && t < weekEnd
-      if (filter === 'upcoming') return t >= now
-      return true
-    })
-    .sort((a, b) => new Date(a.startTime ?? a.start) - new Date(b.startTime ?? b.start))
-}
 
 export default function AppointmentList({ calendarId, calendarIds, title, showGreeting = true }) {
   const { profile, role } = useAuth()
@@ -55,6 +28,7 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
       return t.includes(q) || c.includes(q)
     })
   }, [appointments, filter, search])
+
   const displayName = profile?.full_name?.split(' ')[0] || profile?.email?.split('@')[0] || ''
 
   return (
@@ -159,10 +133,7 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
       )}
 
       {error && (
-        <div
-          className="rounded-2xl px-8 py-12 text-center"
-          style={{ background: '#fff1f2', border: '1px solid #fecdd3' }}
-        >
+        <div className="rounded-2xl px-8 py-12 text-center" style={{ background: '#fff1f2', border: '1px solid #fecdd3' }}>
           <p className="text-3xl mb-3">⚠️</p>
           <p className="font-semibold" style={{ color: '#be123c' }}>Could not load appointments</p>
           <p className="mt-1 text-sm" style={{ color: '#e11d48' }}>{error}</p>
@@ -171,10 +142,7 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
 
       {!loading && !error && filtered.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-20">
-          <div
-            className="flex h-16 w-16 items-center justify-center rounded-2xl"
-            style={{ background: 'rgba(160,125,46,0.08)' }}
-          >
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(160,125,46,0.08)' }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a07d2e" strokeWidth="1.5">
               <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>
             </svg>
