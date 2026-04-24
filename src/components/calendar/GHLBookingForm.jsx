@@ -13,6 +13,7 @@ export default function GHLBookingForm() {
 
   useEffect(() => {
     function onMessage(e) {
+      if (e.origin !== 'https://go.gatewayapp.ai') return
       const h = e.data?.frameHeight ?? e.data?.height
       if (h && h > 100) setHeight(h)
     }

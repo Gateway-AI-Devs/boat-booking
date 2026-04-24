@@ -425,7 +425,12 @@ export default function UsersPage() {
     if (!deleteTarget) return
     setDeleting(true)
     const name = deleteTarget.full_name || deleteTarget.email?.split('@')[0] || 'User'
-    await supabase.functions.invoke('delete-user', { body: { userId: deleteTarget.id } })
+    const { error } = await supabase.functions.invoke('delete-user', { body: { userId: deleteTarget.id } })
+    if (error) {
+      setDeleting(false)
+      setToast(`Failed to remove ${name}: ${error.message}`)
+      return
+    }
     setUsers((prev) => prev.filter((x) => x.id !== deleteTarget.id))
     setDeleting(false)
     setDeleteTarget(null)

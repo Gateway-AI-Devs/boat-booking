@@ -5,7 +5,9 @@ import { supabase } from './supabase'
  * Returns the new public URL.
  */
 export async function uploadAvatar(userId, file) {
-  // Always store as the userId (overwrite previous) — keep extension from file
+  if (!file.type.startsWith('image/')) throw new Error('Only image files are allowed')
+  if (file.size > 5 * 1024 * 1024) throw new Error('File must be smaller than 5 MB')
+
   const ext  = file.name.split('.').pop().toLowerCase()
   const path = `${userId}.${ext}`
 
