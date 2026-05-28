@@ -6,6 +6,7 @@ const AuthContext = createContext(null)
 const ROLE_LABELS = {
   'puravida-captain': 'PuraVida Captain',
   'fantasea-captain': 'FantaSea Captain',
+  'agent':            'Agent',
   'admin':            'Admin',
 }
 

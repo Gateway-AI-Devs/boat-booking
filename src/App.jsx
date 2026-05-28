@@ -19,7 +19,14 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<AppShell />}>
               <Route path="/"            element={<DashboardPage />} />
-              <Route path="/new-booking" element={<NewBookingPage />} />
+              <Route
+                path="/new-booking"
+                element={
+                  <ProtectedRoute requiredRole="admin">
+                    <NewBookingPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/profile"     element={<ProfilePage />} />
               <Route
                 path="/users"

@@ -7,7 +7,7 @@ export default function DashboardPage() {
   const { role } = useAuth()
   const [activeTab, setActiveTab] = useState('all')
 
-  if (role === 'admin') {
+  if (role === 'admin' || role === 'agent') {
     const tab = BRAND_TABS.find((t) => t.id === activeTab)
     return (
       <div>
