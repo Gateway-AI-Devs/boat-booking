@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { uploadAvatar } from '../lib/storage'
 import { useAuth } from '../context/AuthContext'
@@ -12,7 +12,7 @@ import Input from '../components/ui/Input'
 import FormMessage from '../components/ui/FormMessage'
 
 export default function ProfilePage() {
-  const { session, profile, refreshProfile } = useAuth()
+  const { session, profile, roleLabel, refreshProfile } = useAuth()
   const fileRef = useRef(null)
 
   const [fullName, setFullName] = useState(profile?.full_name ?? '')
@@ -26,9 +26,13 @@ export default function ProfilePage() {
   const [pwMsg, setPwMsg] = useState({ type: '', text: '' })
 
   const [avatarUploading, setAvatarUploading] = useState(false)
-  const [avatarSrc, setAvatarSrc] = useState(profile?.avatar_url)
+  const [avatarSrc, setAvatarSrc] = useState(profile?.avatar_url ?? null)
 
-  const roleMeta = ROLE_META[profile?.role] ?? { label: profile?.role, bg: '#f4f4f2', color: '#666' }
+  useEffect(() => {
+    if (profile?.avatar_url) setAvatarSrc(profile.avatar_url)
+  }, [profile?.avatar_url])
+
+  const roleMeta = ROLE_META[profile?.role] ?? { bg: '#f4f4f2', color: '#666' }
 
   async function handleAvatarChange(e) {
     const file = e.target.files?.[0]
@@ -137,7 +141,7 @@ export default function ProfilePage() {
                 className="mt-2 inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide"
                 style={{ background: roleMeta.bg, color: roleMeta.color }}
               >
-                {roleMeta.label}
+                {roleLabel}
               </span>
             </div>
           </div>

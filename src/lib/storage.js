@@ -4,11 +4,17 @@ import { supabase } from './supabase'
  * Upload an avatar for a user and update their profile.
  * Returns the new public URL.
  */
-export async function uploadAvatar(userId, file) {
-  if (!file.type.startsWith('image/')) throw new Error('Only image files are allowed')
-  if (file.size > 5 * 1024 * 1024) throw new Error('File must be smaller than 5 MB')
+const ALLOWED_AVATAR_EXTS = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif']
+const BLOCKED_MIME_TYPES  = ['image/svg+xml', 'image/svg']
 
-  const ext  = file.name.split('.').pop().toLowerCase()
+export async function uploadAvatar(userId, file) {
+  if (!file.type.startsWith('image/'))       throw new Error('Only image files are allowed')
+  if (BLOCKED_MIME_TYPES.includes(file.type)) throw new Error('SVG files are not allowed')
+  if (file.size > 5 * 1024 * 1024)           throw new Error('File must be smaller than 5 MB')
+
+  const ext = file.name.split('.').pop().toLowerCase()
+  if (!ALLOWED_AVATAR_EXTS.includes(ext))    throw new Error('Unsupported file type')
+
   const path = `${userId}.${ext}`
 
   const { error: uploadError } = await supabase.storage

@@ -85,14 +85,8 @@ export default function AppointmentCard({ appt, showContact = false }) {
     >
       {/* Gold left accent bar */}
       <div
-        className="absolute left-0 top-4 bottom-4 w-[3px] rounded-r-full"
-        style={{ background: 'linear-gradient(180deg, #c9a24a, #a07d2e)', opacity: 0.5, transition: 'opacity 0.2s' }}
-        ref={(el) => {
-          if (el) {
-            el.closest('.group').addEventListener('mouseenter', () => { el.style.opacity = '1' })
-            el.closest('.group').addEventListener('mouseleave', () => { el.style.opacity = '0.5' })
-          }
-        }}
+        className="absolute left-0 top-4 bottom-4 w-[3px] rounded-r-full opacity-50 group-hover:opacity-100"
+        style={{ background: 'linear-gradient(180deg, #c9a24a, #a07d2e)' }}
       />
 
       {/* Date block */}
@@ -113,6 +107,7 @@ export default function AppointmentCard({ appt, showContact = false }) {
 
         {/* Row 1: booking metadata */}
         <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
+          <InfoRow icon={ICONS.clock}>{time} – {endTime}</InfoRow>
           {cd.guests != null && (
             <InfoRow icon={ICONS.guests}>{cd.guests} guest{cd.guests !== '1' ? 's' : ''}</InfoRow>
           )}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 export default function GHLBookingForm() {
-  const [height, setHeight] = useState(2340)
+  const [height, setHeight] = useState(800)
 
   useEffect(() => {
     if (document.querySelector('script[src="https://go.gatewayapp.ai/js/form_embed.js"]')) return

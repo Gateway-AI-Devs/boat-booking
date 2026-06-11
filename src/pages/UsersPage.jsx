@@ -14,7 +14,7 @@ export default function UsersPage() {
   const [panelOpen, setPanelOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
-  const [toast, setToast] = useState('')
+  const [toast, setToast] = useState({ text: '', type: 'success' })
 
   useEffect(() => { loadUsers() }, [])
 
@@ -35,13 +35,13 @@ export default function UsersPage() {
     const { error } = await supabase.functions.invoke('delete-user', { body: { userId: deleteTarget.id } })
     if (error) {
       setDeleting(false)
-      setToast(`Failed to remove ${name}: ${error.message}`)
+      setToast({ text: `Failed to remove ${name}: ${error.message}`, type: 'error' })
       return
     }
     setUsers((prev) => prev.filter((x) => x.id !== deleteTarget.id))
     setDeleting(false)
     setDeleteTarget(null)
-    setToast(`${name} has been removed`)
+    setToast({ text: `${name} has been removed`, type: 'success' })
   }
 
   return (
@@ -117,7 +117,7 @@ export default function UsersPage() {
         onCancel={() => setDeleteTarget(null)}
       />
 
-      <Toast message={toast} onDone={() => setToast('')} />
+      <Toast message={toast.text} type={toast.type} onDone={() => setToast({ text: '', type: 'success' })} />
     </div>
   )
 }

@@ -31,6 +31,8 @@ body {
   .app-sidebar { transform: translateX(0) !important; }
 }
 
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* Smooth global transitions */
 *, *::before, *::after {
   transition-property: background-color, border-color, color, box-shadow, opacity, transform;

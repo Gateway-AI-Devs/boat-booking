@@ -1,11 +1,13 @@
 import { useEffect } from 'react'
 
-export default function Toast({ message, onDone }) {
+export default function Toast({ message, type = 'success', onDone }) {
   useEffect(() => {
     if (!message) return
-    const t = setTimeout(onDone, 3000)
+    const t = setTimeout(onDone, 3500)
     return () => clearTimeout(t)
   }, [message, onDone])
+
+  const isError = type === 'error'
 
   return (
     <div
@@ -20,10 +22,19 @@ export default function Toast({ message, onDone }) {
         transition: 'opacity 0.22s, transform 0.22s',
       }}
     >
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full" style={{ background: '#22c55e' }}>
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
+      <span
+        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+        style={{ background: isError ? '#f43f5e' : '#22c55e' }}
+      >
+        {isError ? (
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        ) : (
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        )}
       </span>
       {message}
     </div>

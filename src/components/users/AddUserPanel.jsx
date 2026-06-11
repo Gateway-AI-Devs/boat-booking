@@ -17,6 +17,12 @@ export default function AddUserPanel({ isOpen, onClose, onAdded }) {
     setError(''); setSuccess('')
     setSaving(true)
 
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.')
+      setSaving(false)
+      return
+    }
+
     const { data, error: fnError } = await supabase.functions.invoke('create-user', {
       body: { email, password, role, full_name: fullName },
     })

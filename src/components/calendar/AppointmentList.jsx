@@ -14,7 +14,7 @@ const FILTERS = [
 
 export default function AppointmentList({ calendarId, calendarIds, title, showGreeting = true }) {
   const { profile, role } = useAuth()
-  const { appointments, loading, error } = useCalendarEvents(calendarIds ?? calendarId)
+  const { appointments, loading, error, refetch } = useCalendarEvents(calendarIds ?? calendarId)
   const [filter, setFilter] = useState('upcoming')
   const [search, setSearch] = useState('')
 
@@ -80,15 +80,34 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
             ))}
           </div>
 
-          {/* Count pill */}
-          {!loading && !error && (
-            <span
-              className="rounded-full px-3 py-1 text-[12px] font-semibold"
-              style={{ background: 'rgba(160,125,46,0.1)', color: '#a07d2e' }}
+          {/* Count pill + refresh */}
+          <div className="flex items-center gap-2">
+            {!loading && !error && (
+              <span
+                className="rounded-full px-3 py-1 text-[12px] font-semibold"
+                style={{ background: 'rgba(160,125,46,0.1)', color: '#a07d2e' }}
+              >
+                {filtered.length} booking{filtered.length !== 1 ? 's' : ''}
+              </span>
+            )}
+            <button
+              onClick={refetch}
+              disabled={loading}
+              title="Refresh"
+              className="flex items-center justify-center rounded-lg p-1.5 disabled:opacity-40"
+              style={{ color: '#aaa', background: '#fff', border: '1px solid #e8e3db' }}
+              onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.color = '#a07d2e'; e.currentTarget.style.borderColor = '#a07d2e' } }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#aaa'; e.currentTarget.style.borderColor = '#e8e3db' }}
             >
-              {filtered.length} booking{filtered.length !== 1 ? 's' : ''}
-            </span>
-          )}
+              <svg
+                width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
+                style={{ transition: loading ? 'none' : undefined, animation: loading ? 'spin 0.8s linear infinite' : 'none' }}
+              >
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Search */}
