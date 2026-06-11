@@ -17,9 +17,11 @@ export function useCalendarEvents(calendarIdOrIds) {
     const ids = [...new Set((Array.isArray(calendarIdOrIds) ? calendarIdOrIds : [calendarIdOrIds]).filter(Boolean))]
     if (ids.length === 0) return
 
-    const now       = Date.now()
-    const startTime = new Date(now - 90  * 24 * 60 * 60 * 1000)
-    const endTime   = new Date(now + 365 * 24 * 60 * 60 * 1000)
+    let cancelled = false
+
+    const now        = Date.now()
+    const startTime  = new Date(now - 90  * 24 * 60 * 60 * 1000)
+    const endTime    = new Date(now + 365 * 24 * 60 * 60 * 1000)
     const locationId = import.meta.env.VITE_GHL_LOCATION_ID
 
     setLoading(true)
@@ -29,12 +31,15 @@ export function useCalendarEvents(calendarIdOrIds) {
       ids.map((calendarId) => fetchCalendarEvents({ calendarId, locationId, startTime, endTime }))
     )
       .then((results) => {
+        if (cancelled) return
         const merged = results.flat()
         merged.sort((a, b) => new Date(a.startTime ?? a.start) - new Date(b.startTime ?? b.start))
         setAppointments(merged)
       })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false))
+      .catch((err) => { if (!cancelled) setError(err.message) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => { cancelled = true }
   }, [idKey, tick]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { appointments, loading, error, refetch }
