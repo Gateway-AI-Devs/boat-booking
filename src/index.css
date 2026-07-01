@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-bg:       #f4f4f2;
-  --color-brand-gold:     #a07d2e;
+  --color-brand-bg: #f4f4f2;
+  --color-brand-gold: #a07d2e;
   --color-brand-gold-dark: #8a6b25;
-  --color-brand-muted:    #dededb;
-  --color-brand-text:     #1c1c1a;
-  --color-sidebar:        #171310;
+  --color-brand-muted: #dededb;
+  --color-brand-text: #1c1c1a;
+  --color-sidebar: #171310;
 }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   background-color: #f4f4f2;
   color: #1c1c1a;
   -webkit-font-smoothing: antialiased;
@@ -18,26 +18,116 @@ body {
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar          { width: 5px; height: 5px; }
-::-webkit-scrollbar-track    { background: transparent; }
-::-webkit-scrollbar-thumb    { background: #dededb; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #c8c3bc; }
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #dededb;
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c8c3bc;
+}
 
 /* Sidebar scrollbar invisible */
-.sidebar-scroll::-webkit-scrollbar { width: 0; }
+.sidebar-scroll::-webkit-scrollbar {
+  width: 0;
+}
 
 /* Sidebar always visible on desktop regardless of isOpen state */
 @media (min-width: 1024px) {
-  .app-sidebar { transform: translateX(0) !important; }
+  .app-sidebar {
+    transform: translateX(0) !important;
+  }
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* Smooth global transitions */
-*, *::before, *::after {
-  transition-property: background-color, border-color, color, box-shadow, opacity, transform;
+*,
+*::before,
+*::after {
+  transition-property:
+    background-color, border-color, color, box-shadow, opacity, transform;
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Branded date-range picker styling */
+input.date-range-input {
+  accent-color: var(--color-brand-gold);
+  color: var(--color-brand-text);
+  border-color: #e8e3db;
+  background: #fff;
+}
+
+input.date-range-input:focus {
+  border-color: var(--color-brand-gold);
+  box-shadow: 0 0 0 3px rgba(160, 125, 46, 0.16);
+}
+
+input.date-range-input::-webkit-datetime-edit,
+input.date-range-input::-webkit-datetime-edit-text,
+input.date-range-input::-webkit-datetime-edit-month-field,
+input.date-range-input::-webkit-datetime-edit-day-field,
+input.date-range-input::-webkit-datetime-edit-year-field {
+  color: var(--color-brand-text);
+}
+
+input.date-range-input::-webkit-calendar-picker-indicator {
+  filter: invert(35%) sepia(63%) saturate(338%) hue-rotate(17deg)
+    brightness(95%) contrast(92%);
+}
+
+.calendar-popover {
+  min-width: 260px;
+}
+
+.calendar-day {
+  aspect-ratio: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  color: #1c1c1a;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.calendar-day:hover {
+  background: rgba(160, 125, 46, 0.12);
+}
+
+.calendar-day--faded {
+  color: #ccc8bc;
+}
+
+.calendar-day--today {
+  border: 1px solid rgba(160, 125, 46, 0.35);
+}
+
+.calendar-day--selected {
+  background: var(--color-brand-gold);
+  color: #fff;
+}
+
+.calendar-day--in-range {
+  background: rgba(160, 125, 46, 0.14);
 }
 
 /* ── GHL Popup overrides ── */
@@ -72,18 +162,20 @@ button[id*="popup-close"],
   border-radius: 50% !important;
   background: #fff !important;
   border: 1.5px solid #e2ddd5 !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer !important;
-  transition: background 0.15s, box-shadow 0.15s !important;
+  transition:
+    background 0.15s,
+    box-shadow 0.15s !important;
 }
 button[class*="popup-close"]:hover,
 .lc-popup-close:hover,
 [aria-label="Close"]:hover {
   background: #f4f4f2 !important;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.16) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
 }
 button[class*="popup-close"] svg,
 .lc-popup-close svg,
@@ -94,12 +186,32 @@ button[class*="popup-close"] svg,
 }
 
 /* React Big Calendar overrides (kept for any calendar remnants) */
-.rbc-calendar { font-family: inherit; background: #f4f4f2; }
-.rbc-toolbar button {
-  border: 1px solid #dededb; background: #f4f4f2; color: #1c1c1a;
-  border-radius: 6px; padding: 6px 14px; font-size: 0.875rem; cursor: pointer;
+.rbc-calendar {
+  font-family: inherit;
+  background: #f4f4f2;
 }
-.rbc-toolbar button.rbc-active { background: #a07d2e !important; color: #fff !important; border-color: #a07d2e !important; }
-.rbc-event { background-color: #a07d2e; border: none; border-radius: 4px; }
-.rbc-today { background-color: #efe9dd !important; }
-.rbc-current-time-indicator { background-color: #a07d2e; }
+.rbc-toolbar button {
+  border: 1px solid #dededb;
+  background: #f4f4f2;
+  color: #1c1c1a;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.rbc-toolbar button.rbc-active {
+  background: #a07d2e !important;
+  color: #fff !important;
+  border-color: #a07d2e !important;
+}
+.rbc-event {
+  background-color: #a07d2e;
+  border: none;
+  border-radius: 4px;
+}
+.rbc-today {
+  background-color: #efe9dd !important;
+}
+.rbc-current-time-indicator {
+  background-color: #a07d2e;
+}
