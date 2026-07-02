@@ -8,17 +8,19 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('all')
 
   if (role === 'admin' || role === 'agent') {
-    const tab = BRAND_TABS.find((t) => t.id === activeTab)
+    const visibleTabs = BRAND_TABS.filter((tab) => role === 'admin' || tab.id !== 'other-boats')
+    const tab = visibleTabs.find((t) => t.id === activeTab) ?? visibleTabs[0]
+
     return (
       <div>
         <div className="mb-6 flex gap-1 border-b border-brand-muted overflow-x-auto">
-          {BRAND_TABS.map((t) => (
+          {visibleTabs.map((t) => (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               className={`flex items-center gap-2 -mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${activeTab === t.id
-                  ? 'border-brand-gold text-brand-gold'
-                  : 'border-transparent text-[#888] hover:text-brand-text'
+                ? 'border-brand-gold text-brand-gold'
+                : 'border-transparent text-[#888] hover:text-brand-text'
                 }`}
             >
               <span>{t.icon}</span>
