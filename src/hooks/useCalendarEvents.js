@@ -18,7 +18,7 @@ export function useCalendarEvents(calendarIdOrIds) {
     if (ids.length === 0) return
 
     let cancelled = false
-    const debounceMs = 150
+
     const now = Date.now()
     const startTime = new Date(now - 90 * 24 * 60 * 60 * 1000)
     const endTime = new Date(now + 365 * 24 * 60 * 60 * 1000)
@@ -27,26 +27,19 @@ export function useCalendarEvents(calendarIdOrIds) {
     setLoading(true)
     setError(null)
 
-    const timer = setTimeout(() => {
-      if (cancelled) return
+    Promise.all(
+      ids.map((calendarId) => fetchCalendarEvents({ calendarId, locationId, startTime, endTime }))
+    )
+      .then((results) => {
+        if (cancelled) return
+        const merged = results.flat()
+        merged.sort((a, b) => new Date(a.startTime ?? a.start) - new Date(b.startTime ?? b.start))
+        setAppointments(merged)
+      })
+      .catch((err) => { if (!cancelled) setError(err.message) })
+      .finally(() => { if (!cancelled) setLoading(false) })
 
-      Promise.all(
-        ids.map((calendarId) => fetchCalendarEvents({ calendarId, locationId, startTime, endTime }))
-      )
-        .then((results) => {
-          if (cancelled) return
-          const merged = results.flat()
-          merged.sort((a, b) => new Date(a.startTime ?? a.start) - new Date(b.startTime ?? b.start))
-          setAppointments(merged)
-        })
-        .catch((err) => { if (!cancelled) setError(err.message) })
-        .finally(() => { if (!cancelled) setLoading(false) })
-    }, debounceMs)
-
-    return () => {
-      cancelled = true
-      clearTimeout(timer)
-    }
+    return () => { cancelled = true }
   }, [idKey, tick]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { appointments, loading, error, refetch }
