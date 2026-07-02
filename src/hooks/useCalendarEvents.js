@@ -18,10 +18,10 @@ export function useCalendarEvents(calendarIdOrIds) {
     if (ids.length === 0) return
 
     let cancelled = false
-
-    const now        = Date.now()
-    const startTime  = new Date(now - 90  * 24 * 60 * 60 * 1000)
-    const endTime    = new Date(now + 365 * 24 * 60 * 60 * 1000)
+    const debounceMs = 150
+    const now = Date.now()
+    const startTime = new Date(now - 90 * 24 * 60 * 60 * 1000)
+    const endTime = new Date(now + 365 * 24 * 60 * 60 * 1000)
     const locationId = import.meta.env.VITE_GHL_LOCATION_ID
 
     setLoading(true)
