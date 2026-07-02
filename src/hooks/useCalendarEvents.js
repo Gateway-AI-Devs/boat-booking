@@ -19,27 +19,34 @@ export function useCalendarEvents(calendarIdOrIds) {
 
     let cancelled = false
 
-    const now = Date.now()
-    const startTime = new Date(now - 90 * 24 * 60 * 60 * 1000)
-    const endTime = new Date(now + 365 * 24 * 60 * 60 * 1000)
+    const now        = Date.now()
+    const startTime  = new Date(now - 90  * 24 * 60 * 60 * 1000)
+    const endTime    = new Date(now + 365 * 24 * 60 * 60 * 1000)
     const locationId = import.meta.env.VITE_GHL_LOCATION_ID
 
     setLoading(true)
     setError(null)
 
-    Promise.all(
-      ids.map((calendarId) => fetchCalendarEvents({ calendarId, locationId, startTime, endTime }))
-    )
-      .then((results) => {
-        if (cancelled) return
-        const merged = results.flat()
-        merged.sort((a, b) => new Date(a.startTime ?? a.start) - new Date(b.startTime ?? b.start))
-        setAppointments(merged)
-      })
-      .catch((err) => { if (!cancelled) setError(err.message) })
-      .finally(() => { if (!cancelled) setLoading(false) })
+    const timer = setTimeout(() => {
+      if (cancelled) return
 
-    return () => { cancelled = true }
+      Promise.all(
+        ids.map((calendarId) => fetchCalendarEvents({ calendarId, locationId, startTime, endTime }))
+      )
+        .then((results) => {
+          if (cancelled) return
+          const merged = results.flat()
+          merged.sort((a, b) => new Date(a.startTime ?? a.start) - new Date(b.startTime ?? b.start))
+          setAppointments(merged)
+        })
+        .catch((err) => { if (!cancelled) setError(err.message) })
+        .finally(() => { if (!cancelled) setLoading(false) })
+    }, debounceMs)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
   }, [idKey, tick]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { appointments, loading, error, refetch }
