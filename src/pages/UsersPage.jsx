@@ -45,7 +45,7 @@ export default function UsersPage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto max-w-4xl">
       {/* Page header */}
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>

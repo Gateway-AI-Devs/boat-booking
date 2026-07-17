@@ -88,11 +88,12 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
       </div>
 
       {/* Nav section label */}
-      <div className="px-5 pb-1.5 pt-6">
+      {/* <div className="px-5 pb-1.5 pt-6">
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: 'rgba(255,255,255,0.25)' }}>
           Internal Bookings
         </p>
-      </div>
+      </div> */}
+      <br/>
 
       {/* Nav links */}
       <nav className="sidebar-scroll flex-1 overflow-y-auto px-3 space-y-0.5 pb-4">

@@ -3,48 +3,46 @@ import { useCalendarEvents } from '../../hooks/useCalendarEvents'
 import { useAuth } from '../../context/AuthContext'
 import AppointmentCard from './AppointmentCard'
 import Spinner from '../ui/Spinner'
-import { greeting, formattedDate, applyFilter } from '../../utils/dateUtils'
+import { greeting, formattedDate, applyFilter, TIMEZONE, getMadridDateStr, getDayLabel, getDateSubLabel } from '../../utils/dateUtils'
 
-const FILTERS = [
-  { id: 'upcoming', label: 'Upcoming' },
-  { id: 'today', label: 'Today' },
-  { id: 'week', label: 'This week' },
-  { id: 'all', label: 'All' },
-]
-
-export default function AppointmentList({ calendarId, calendarIds, title, showGreeting = true }) {
+export default function AppointmentList({
+  calendarId, calendarIds, title, showGreeting = true,
+  filter: externalFilter, search: externalSearch,
+  startDate: externalStartDate, endDate: externalEndDate,
+}) {
   const { profile, role } = useAuth()
   const { appointments, loading, error, refetch } = useCalendarEvents(calendarIds ?? calendarId)
-  const [filter, setFilter] = useState('upcoming')
-  const [search, setSearch] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
+
+  // Use external filter state when provided (admin/agent), internal otherwise (captain)
+  const [internalFilter, setInternalFilter] = useState('upcoming')
+  const [internalSearch, setInternalSearch] = useState('')
+  const [internalStartDate, setInternalStartDate] = useState('')
+  const [internalEndDate, setInternalEndDate] = useState('')
+
+  const filter = externalFilter ?? internalFilter
+  const search = externalSearch ?? internalSearch
+  const startDate = externalStartDate ?? internalStartDate
+  const endDate = externalEndDate ?? internalEndDate
+
   const [page, setPage] = useState(1)
-  const PAGE_SIZE = 8
+  const PAGE_SIZE = 12
 
   const matchesDateRange = (appt) => {
     const rawDate = appt.startTime ?? appt.start ?? appt.appointmentTime ?? appt.date ?? appt.datetime
     if (!rawDate) return true
-
     const dateValue = new Date(rawDate)
     if (Number.isNaN(dateValue.getTime())) return true
-
-    const bookingDate = `${dateValue.getFullYear()}-${String(dateValue.getMonth() + 1).padStart(2, '0')}-${String(dateValue.getDate()).padStart(2, '0')}`
-
+    const bookingDate = getMadridDateStr(dateValue)
     if (startDate && bookingDate < startDate) return false
     if (endDate && bookingDate > endDate) return false
     return true
   }
 
   const filtered = useMemo(() => {
-    const base = filter === 'all'
-      ? appointments
-      : applyFilter(appointments, filter)
-
+    const base = filter === 'all' ? appointments : applyFilter(appointments, filter)
     const filteredBase = filter === 'all' && (startDate || endDate)
       ? base.filter(matchesDateRange)
       : base
-
     if (!search.trim()) return filteredBase
     const q = search.trim().toLowerCase()
     return filteredBase.filter((a) => {
@@ -54,9 +52,7 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
     })
   }, [appointments, filter, search, startDate, endDate])
 
-  useEffect(() => {
-    setPage(1)
-  }, [filter, search, startDate, endDate])
+  useEffect(() => { setPage(1) }, [filter, search, startDate, endDate])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pagedAppointments = useMemo(() => {
@@ -64,13 +60,31 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
     return filtered.slice(start, start + PAGE_SIZE)
   }, [filtered, page])
 
+  const grouped = useMemo(() => {
+    const groups = {}
+    pagedAppointments.forEach((appt) => {
+      const raw = appt.startTime ?? appt.start ?? appt.appointmentTime
+      const dt = new Date(raw)
+      const key = Number.isNaN(dt.getTime()) ? 'unknown' : getMadridDateStr(dt)
+      if (!groups[key]) groups[key] = { date: dt, items: [], key }
+      groups[key].items.push(appt)
+    })
+    return Object.values(groups).sort((a, b) => {
+      if (a.key === 'unknown') return 1
+      if (b.key === 'unknown') return -1
+      return a.date - b.date
+    })
+  }, [pagedAppointments])
+
   const displayName = profile?.full_name?.split(' ')[0] || profile?.email?.split('@')[0] || ''
+
+  const hasControls = externalFilter === undefined
 
   return (
     <div>
       {/* Page header */}
       {showGreeting && (
-        <div className="mb-8">
+        <div className="mb-6">
           <p className="text-sm font-medium mb-1" style={{ color: '#a07d2e', letterSpacing: '0.02em' }}>
             {formattedDate()}
           </p>
@@ -89,139 +103,40 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
         </div>
       )}
 
-      {/* Controls bar */}
-      <div className="mb-6 flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Segmented filter control */}
-          <div
-            className="inline-flex rounded-xl p-1 gap-0.5 overflow-x-auto max-w-full"
-            style={{ background: '#fff', border: '1px solid #e8e3db', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-          >
-            {FILTERS.map((f) => (
+      {/* Inline controls for captain view (no external filter) */}
+      {hasControls && (
+        <div className="mb-5 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={internalSearch}
+              onChange={(e) => setInternalSearch(e.target.value)}
+              placeholder="Search bookings…"
+              className="flex-1 rounded-xl border bg-[#fefcf9] px-4 py-2 text-[13px] outline-none"
+              style={{ borderColor: '#e8e3db', color: '#1c1c1a' }}
+              onFocus={(e) => { e.target.style.borderColor = '#a07d2e' }}
+              onBlur={(e) => { e.target.style.borderColor = '#e8e3db' }}
+            />
+          </div>
+          <div className="flex items-center gap-1">
+            {['upcoming', 'today', 'week', 'all'].map((id) => (
               <button
-                key={f.id}
-                onClick={() => setFilter(f.id)}
-                className="rounded-lg px-4 py-1.5 text-[13px] font-medium"
-                style={
-                  filter === f.id
-                    ? { background: '#a07d2e', color: '#fff', boxShadow: '0 1px 3px rgba(160,125,46,0.35)' }
-                    : { color: '#888' }
-                }
-                onMouseEnter={(e) => { if (filter !== f.id) e.currentTarget.style.color = '#1c1c1a' }}
-                onMouseLeave={(e) => { if (filter !== f.id) e.currentTarget.style.color = '#888' }}
+                key={id}
+                onClick={() => setInternalFilter(id)}
+                className="rounded-lg px-3 py-1 text-[12px] font-medium"
+                style={{
+                  background: internalFilter === id ? '#a07d2e' : 'transparent',
+                  color: internalFilter === id ? '#fff' : '#888',
+                }}
               >
-                {f.label}
+                {id.charAt(0).toUpperCase() + id.slice(1)}
               </button>
             ))}
           </div>
-
-          {/* Count pill + refresh */}
-          <div className="flex items-center gap-2">
-            {!loading && !error && (
-              <span
-                className="rounded-full px-3 py-1 text-[12px] font-semibold"
-                style={{ background: 'rgba(160,125,46,0.1)', color: '#a07d2e' }}
-              >
-                {filtered.length} booking{filtered.length !== 1 ? 's' : ''}
-              </span>
-            )}
-            <button
-              onClick={refetch}
-              disabled={loading}
-              title="Refresh"
-              className="flex items-center justify-center rounded-lg p-1.5 disabled:opacity-40"
-              style={{ color: '#aaa', background: '#fff', border: '1px solid #e8e3db' }}
-              onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.color = '#a07d2e'; e.currentTarget.style.borderColor = '#a07d2e' } }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#aaa'; e.currentTarget.style.borderColor = '#e8e3db' }}
-            >
-              <svg
-                width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
-                style={{ transition: loading ? 'none' : undefined, animation: loading ? 'spin 0.8s linear infinite' : 'none' }}
-              >
-                <polyline points="23 4 23 10 17 10" />
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-              </svg>
-            </button>
-          </div>
         </div>
+      )}
 
-        {/* Search */}
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-end">
-          <div className="relative flex-1">
-            <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center" style={{ color: '#bbb' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            </span>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by booking name or guest…"
-              className="w-full rounded-xl border bg-white py-2.5 pl-10 pr-10 text-[13.5px] outline-none"
-              style={{ borderColor: '#e8e3db', color: '#1c1c1a', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
-              onFocus={(e) => { e.target.style.borderColor = '#a07d2e'; e.target.style.boxShadow = '0 0 0 3px rgba(160,125,46,0.12)' }}
-              onBlur={(e) => { e.target.style.borderColor = '#e8e3db'; e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)' }}
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="absolute inset-y-0 right-3.5 flex items-center"
-                style={{ color: '#bbb' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = '#888' }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = '#bbb' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {filter === 'all' ? (
-            <div className="flex flex-wrap items-end gap-2">
-              <label className="flex flex-col gap-1 text-[12px]" style={{ color: '#888' }}>
-                <span>From</span>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="rounded-lg border bg-white px-3 py-2 text-[13px] outline-none"
-                  style={{ borderColor: '#e8e3db', color: '#1c1c1a' }}
-                />
-              </label>
-
-              <label className="flex flex-col gap-1 text-[12px]" style={{ color: '#888' }}>
-                <span>To</span>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="rounded-lg border bg-white px-3 py-2 text-[13px] outline-none"
-                  style={{ borderColor: '#e8e3db', color: '#1c1c1a' }}
-                />
-              </label>
-
-              {(startDate || endDate) && (
-                <button
-                  onClick={() => {
-                    setStartDate('')
-                    setEndDate('')
-                  }}
-                  className="rounded-lg px-3 py-2 text-[12px] font-medium"
-                  style={{ background: '#f7f2e8', color: '#7a5f22' }}
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          ) : (
-            <div />
-          )}
-        </div>
-      </div>
-
-      {/* States */}
+      {/* Loading */}
       {loading && (
         <div className="flex flex-col items-center gap-4 py-20">
           <Spinner size="lg" />
@@ -229,6 +144,7 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
         </div>
       )}
 
+      {/* Error */}
       {error && (
         <div className="rounded-2xl px-8 py-12 text-center" style={{ background: '#fff1f2', border: '1px solid #fecdd3' }}>
           <p className="text-3xl mb-3">⚠️</p>
@@ -237,6 +153,7 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
         </div>
       )}
 
+      {/* Empty */}
       {!loading && !error && filtered.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-20">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(160,125,46,0.08)' }}>
@@ -251,9 +168,10 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
         </div>
       )}
 
+      {/* Schedule grid */}
       {!loading && !error && filtered.length > 0 && (
         <div className="flex flex-col gap-3">
-          <div className="mb-1 flex items-center justify-between text-[12px]" style={{ color: '#888' }}>
+          <div className="flex items-center justify-between text-[12px]" style={{ color: '#888' }}>
             <span>
               Showing {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}-{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
             </span>
@@ -262,42 +180,65 @@ export default function AppointmentList({ calendarId, calendarIds, title, showGr
             )}
           </div>
 
-          {pagedAppointments.map((appt) => (
-            <AppointmentCard key={appt.id ?? appt.startTime} appt={appt} showContact={role === 'admin'} />
+          {grouped.map((group) => (
+            <div key={group.key}>
+              <div className="flex items-center justify-between mb-2.5 mt-1 first:mt-0">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="h-2.5 w-2.5 rounded-full shrink-0"
+                    style={{ background: group.key !== 'unknown' && getMadridDateStr(group.date) === getMadridDateStr(new Date()) ? '#a07d2e' : '#dededb' }}
+                  />
+                  <div>
+                    <h3 className="text-[13px] font-semibold leading-tight" style={{ color: '#1c1c1a' }}>
+                      {group.key !== 'unknown' ? getDayLabel(group.date) : 'Unknown date'}
+                    </h3>
+                    {group.key !== 'unknown' && (
+                      <p className="text-[11px]" style={{ color: '#aaa' }}>{getDateSubLabel(group.date)}</p>
+                    )}
+                  </div>
+                </div>
+                <span className="text-[11px] font-medium rounded-full px-2.5 py-0.5" style={{ background: 'rgba(160,125,46,0.07)', color: '#a07d2e' }}>
+                  {group.items.length} booking{group.items.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+                {group.items.map((appt) => (
+                  <AppointmentCard key={appt.id ?? appt.startTime} appt={appt} showContact={role === 'admin'} />
+                ))}
+              </div>
+            </div>
           ))}
 
           {filtered.length > PAGE_SIZE && (
-            <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border px-4 py-3" style={{ borderColor: '#e8e3db', background: '#fff' }}>
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border px-4 py-3" style={{ borderColor: '#e8e3db', background: '#fefcf9' }}>
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="rounded-lg px-3 py-1.5 text-[13px] font-medium disabled:opacity-40"
+                className="rounded-lg px-3 py-1.5 text-[13px] font-medium disabled:opacity-40 cursor-pointer"
                 style={{ background: '#f7f2e8', color: '#7a5f22' }}
               >
                 Previous
               </button>
-
               <div className="flex items-center gap-1.5">
                 {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNumber) => (
                   <button
                     key={pageNumber}
                     onClick={() => setPage(pageNumber)}
-                    className="h-8 min-w-8 rounded-lg text-[13px] font-semibold"
-                    style={
-                      page === pageNumber
-                        ? { background: '#a07d2e', color: '#fff' }
-                        : { background: '#f7f2e8', color: '#7a5f22' }
+                    className="h-8 min-w-8 rounded-lg text-[13px] font-semibold cursor-pointer"
+                    style={page === pageNumber
+                      ? { background: '#a07d2e', color: '#fff' }
+                      : { background: '#f7f2e8', color: '#7a5f22' }
                     }
                   >
                     {pageNumber}
                   </button>
                 ))}
               </div>
-
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="rounded-lg px-3 py-1.5 text-[13px] font-medium disabled:opacity-40"
+                className="rounded-lg px-3 py-1.5 text-[13px] font-medium disabled:opacity-40 cursor-pointer"
                 style={{ background: '#f7f2e8', color: '#7a5f22' }}
               >
                 Next

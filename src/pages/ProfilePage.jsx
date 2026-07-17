@@ -96,7 +96,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div>
+    <div className="mx-auto max-w-4xl">
       <div className="mb-8">
         <h1
           className="text-[30px] leading-tight font-normal"
